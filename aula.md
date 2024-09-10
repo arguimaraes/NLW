@@ -54,3 +54,7 @@ Acesso a propriedades de objetos
 - Criar, passar argumento
 - Executar
 - Arrow function / Named function
+
+# Estrutura de repetição
+
+- While
