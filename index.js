@@ -1,20 +1,12 @@
-const { select, input, checkbox } = require('@inquirer/prompts') /* Essa sintaxe define que o programa irá importar o inquirer, ou seja, que o programa irá buscar dentro da pasta node_modules o @inquirer e dentro do @inquirer, a pasta prompts e de dentro dela ele vai extrair alguma coisa ("um código... uma função... que a gente vai usar daqui a pouco")*/
+// Importa os módulos necessários para funcionamento adequado da aplicação
+const { select, input, checkbox } = require('@inquirer/prompts')
 const fs = require('fs').promises
 
-/* Palavras do professor sobre o que essa sintaxe informa/significa: O "require('@inquirer/prompts')" vai me devolver um objeto, de dentro do objeto eu quero apenas o "select" e o "input". */
-
+// Cria as principais variáveis globais a serem manipuladas ao longo do código
 let mensagem = 'Bem vindo(a) ao App de Metas';
+let metas
 
-/* let meta = {
-  value: 'Tomar 3L de água por dia',
-  checked: false
-} 
-
-Antes, eu definia a estrutura de cada meta que estava aqui, entretanto, ao criar o arquivo JSON de dados (metas.json), eu deixo definida a estrutura lá no arquivo json.
-*/
-
-let metas // Crio o array de metas
-
+// Cria função para resgatar do arquivo JSON as metas cadastradas e suas respectivas situações e previne erro
 const carregarMetas = async () => {
   try {
     const dados = await fs.readFile('metas.json', 'utf-8');
@@ -25,16 +17,18 @@ const carregarMetas = async () => {
   }
 }
 
+// Cria função para alimentar o arquivo JSON, de forma adequada, com as metas após manipulação
 const salvarMetas = async () => {
   await fs.writeFile("metas.json", JSON.stringify(metas, null, 2));
 }
 
+// Cria função que permite ao usuário cadastrar as metas que desejar e as insere no array metas 
 const cadastrarMeta = async () => {
   const meta = await input({ message: 'Digite a meta:'})
 
   if(meta.length == 0) {
     mensagem = 'A meta não pode ser vazia.';
-    return //Se você quisesse manter a pessoa presa nessa etapa, bastava digitar "return ((await)) cadastrarMeta()" para chamar a função novamente até que o usuário digite uma meta não vazia.
+    return
   }
 
   metas.push(
@@ -44,6 +38,7 @@ const cadastrarMeta = async () => {
   mensagem = 'Meta cadastrada com sucesso!'
 }
 
+// Cria função que permite visualizar todas as metas e marcar/desmarcar as metas à medida que forem realizadas
 const listarMetas = async () => {
   if(metas.length == 0) {
     mensagem = 'Não existem metas listadas. Por favor, cadastre uma ou mais metas.'
@@ -52,7 +47,7 @@ const listarMetas = async () => {
 
   const respostas = await checkbox({
     message: 'Use as setas para mudar de meta, o espaço para marcar/desmarcar e o Enter para finalizar essa etapa.',
-    choices: [...metas], // As reticências significa Spread (espalhar) e serve para jogar tudo de um array dentro de outro
+    choices: [...metas],
     instructions: false
   })
 
@@ -72,12 +67,11 @@ const listarMetas = async () => {
 
     meta.checked = true
   })
-  /* forEach é um método associado a um array que possibilita executar uma função ~para cada~ elemento do array.
-   "resposta", nesse caso, é o primeiro elemento do array que será tratado pela função*/
 
   mensagem = 'Meta(s) marcada(s) como concluída(s)';
 }
 
+// Cria função que permite visualizar as metas que foram marcadas como realizadas
 const metasRealizadas = async () => {
   if(metas.length == 0) {
     mensagem = 'Não existem metas listadas. Por favor, cadastre uma ou mais metas.'
@@ -99,6 +93,7 @@ const metasRealizadas = async () => {
   })
 }
 
+// Cria função que permite visualizar as metas que ainda não foram marcadas como realizadas (estão em aberto)
 const metasAbertas = async () => {
   if(metas.length == 0) {
     mensagem = 'Não existem metas listadas. Por favor, cadastre uma ou mais metas.'
@@ -120,6 +115,7 @@ const metasAbertas = async () => {
   })
 }
 
+// Cria função que permite selecionar metas para serem removidas da lista
 const removerMetas = async () => {
   if(metas.length == 0) {
     mensagem = 'Não existem metas listadas. Por favor, cadastre uma ou mais metas.'
@@ -150,8 +146,9 @@ const removerMetas = async () => {
   mensagem = 'Meta(s) removida(s) com sucesso!'
 }
 
+// Cria um sistema de mensagens para manter o console limpo e apenas com mensagens relevantes ao usuário
 const mostrarMensagem = () => {
-  console.clear(); //Esse comando serve para limpar o console e deixar o programa mais limpo.
+  console.clear();
 
   if(mensagem != '') {
     console.log('');
@@ -161,21 +158,22 @@ const mostrarMensagem = () => {
   }
 }
 
-const start = async () => { // O async é obrigatório por conta do await lá na linha 9
+// Cria a aplicação principal
+const start = async () => {
   
   await carregarMetas();
   
+  // Cria um menu de opções que aguarda a decisão do usuário e efetua a função adequada à necessidade da escolha
   while(true){
-    mostrarMensagem(); //Chamando essa função aqui, o programa limpa o console sempre que o menu é mostrado, logo, mantendo o console limpo sempre.
+    mostrarMensagem(); 
     await salvarMetas();
 
-    // O await, por sua vez, é usado para informar ao programa que, para o while ser ativado, ele deve ~aguardar~ o usuário selecionar algo (Essa seleção do usuário é possível graças ao select que a gente importou com o inquirer)
     const opcao = await select({
       message: 'Menu >',
       choices: [
         {
-          name: 'Cadastrar meta', //O name é o que será apresentado ao usuário
-          value: 'cadastrar' //O value é o valor que será passado para a variável opcao, que será usada no switch
+          name: 'Cadastrar meta',
+          value: 'cadastrar'
         },
         {
           name: 'Listar metas',
@@ -198,13 +196,12 @@ const start = async () => { // O async é obrigatório por conta do await lá na
           value: 'sair'
         }
       ]
-    }) /* É obrigatória essa estrutura para esse tipo de select do inquirer, pois isso é pré-definido pela biblioteca. Cada biblioteca pode ser estudada para descobrirmos as estruturas necessárias.
-    Neste caso, é essa estrutura a que se pede: com o "message: 'String_qualquer'," e o "choices: []", pois essa função espera um objeto que tenha exatamente essas propriedades. Além disso o choices tem que ser um array, que pode ser de objetos. */
+    })
 
 
     switch (opcao) {
       case 'cadastrar':
-        await cadastrarMeta(); // Sempre que for chamar uma função assíncrona, é preciso colocar await na frente
+        await cadastrarMeta();
         break;
       case 'listar':
         await listarMetas();
@@ -225,4 +222,5 @@ const start = async () => { // O async é obrigatório por conta do await lá na
   }
 }
 
+// Inicia a aplicação carregando metas previamente cadastradas e abrindo o menu de opções
 start();

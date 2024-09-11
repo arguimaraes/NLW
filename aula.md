@@ -1,3 +1,5 @@
+### Conceitos aprendidos durante a NLW Pocket 17
+
 ## Linguagem de programação
 
 Maneira de dar instrução ao computador.
