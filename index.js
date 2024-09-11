@@ -1,4 +1,4 @@
-const { select, input } = require('@inquirer/prompts') /* Essa sintaxe define que o programa irá importar o inquirer, ou seja, que o programa irá buscar dentro da pasta node_modules o @inquirer e dentro do @inquirer, a pasta prompts e de dentro dela ele vai extrair alguma coisa ("um código... uma função... que a gente vai usar daqui a pouco")*/ 
+const { select, input, checkbox } = require('@inquirer/prompts') /* Essa sintaxe define que o programa irá importar o inquirer, ou seja, que o programa irá buscar dentro da pasta node_modules o @inquirer e dentro do @inquirer, a pasta prompts e de dentro dela ele vai extrair alguma coisa ("um código... uma função... que a gente vai usar daqui a pouco")*/ 
 
 /* Palavras do professor sobre o que essa sintaxe informa/significa: O "require('@inquirer/prompts')" vai me devolver um objeto, de dentro do objeto eu quero apenas o "select" e o "input". */
 
@@ -20,6 +20,35 @@ const cadastrarMeta = async () => {
   metas.push(
     { value: meta, checked: false }
 )
+}
+
+const listarMetas = async () => {
+  const respostas = await checkbox({
+    message: 'Use as setas para mudar de meta, o espaço para marcar/desmarcar e o Enter para finalizar essa etapa.',
+    choices: [...metas], // As reticências significa Spread (espalhar) e serve para jogar tudo de um array dentro de outro
+    instructions: false
+  })
+
+  if(respostas.length == 0) {
+    console.log('Nenhuma meta selecionada');
+    return
+  }
+
+  metas.forEach((m) => {
+    m.checked = false
+  })
+
+  respostas.forEach((resposta) => {
+    const meta = metas.find((m) => {
+      return m.value == resposta
+    })
+
+    meta.checked = true
+  })
+  /* forEach é um método associado a um array que possibilita executar uma função ~para cada~ elemento do array.
+   "resposta", nesse caso, é o primeiro elemento do array que será tratado pela função*/
+
+  console.log('Meta(s) marcadas como concluída(s)');
 }
 
 const start = async () => { // O async é obrigatório por conta do await lá na linha 9
@@ -53,7 +82,7 @@ const start = async () => { // O async é obrigatório por conta do await lá na
         console.log(metas);
         break;
       case 'listar':
-        console.log('vamos listar');
+        await listarMetas();
         break;
       case 'sair':
         console.log('Até a próxima');
