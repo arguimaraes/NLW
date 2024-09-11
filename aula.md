@@ -34,8 +34,9 @@ Boolean: true, false
 
 ## Operadores
 
-Operadores de atribuição de valor =
-Operador de concatenação +
+Operador de atribuição de valor: =
+Operador de concatenação: +
+Operadores de comparação: == != > < >= <=
 
 ## Estruturas de dados:
 
@@ -59,9 +60,10 @@ Acesso a propriedades de objetos
 
 - While
 
-# Condicionais
+# Condicionais (Controle de fluxo)
 
 - Switch
+- if/else
 
 ## Módulos em Node.js:
 
