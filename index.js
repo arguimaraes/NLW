@@ -62,7 +62,7 @@ const metasRealizadas = async () => {
   }
 
   await select({
-    message: 'Metas realizadas ' + realizadas.length,
+    message: 'Metas realizadas: ' + realizadas.length,
     choices: [...realizadas]
   })
 }
@@ -78,9 +78,34 @@ const metasAbertas = async () => {
   }
 
   await select({
-    message: 'Metas abertas ' + abertas.length,
+    message: 'Metas abertas: ' + abertas.length,
     choices: [...abertas]
   })
+}
+
+const removerMetas = async () => {
+  const metasDesmarcadas = metas.map((meta) => {
+    return { value: meta.value, checked: false }
+  })
+  
+  const metasARemover = await checkbox({
+    message: 'Selecione metas para remover. (Use o espaço para marcar/desmarcar e o Enter para finalizar essa etapa).',
+    choices: [...metasDesmarcadas],
+    instructions: false
+  })
+
+  if(metasARemover.length == 0) {
+    console.log('Nenhuma meta a remover.');
+    return
+  }
+
+  metasARemover.forEach((metaARemover) => {
+    metas = metas.filter((meta) => {
+      return meta.value != metaARemover
+    })
+  })
+
+  console.log('Meta(s) removida(s) com sucesso!')
 }
 
 const start = async () => { // O async é obrigatório por conta do await lá na linha 9
@@ -108,6 +133,10 @@ const start = async () => { // O async é obrigatório por conta do await lá na
           value: 'abertas'
         },
         {
+          name: 'Remover metas',
+          value: 'remover'
+        },
+        {
           name: 'Sair',
           value: 'sair'
         }
@@ -129,6 +158,9 @@ const start = async () => { // O async é obrigatório por conta do await lá na
         break;
       case 'abertas':
         await metasAbertas();
+        break;
+      case 'remover':
+        await removerMetas();
         break;
       case 'sair':
         console.log('Até a próxima');
