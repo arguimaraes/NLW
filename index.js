@@ -2,6 +2,8 @@ const { select, input, checkbox } = require('@inquirer/prompts') /* Essa sintaxe
 
 /* Palavras do professor sobre o que essa sintaxe informa/significa: O "require('@inquirer/prompts')" vai me devolver um objeto, de dentro do objeto eu quero apenas o "select" e o "input". */
 
+let mensagem = 'Bem vindo(a) ao App de Metas';
+
 let meta = { // Defino como será a estrutura do objeto meta
   value: 'Tomar 3L de água por dia',
   checked: false
@@ -13,16 +15,23 @@ const cadastrarMeta = async () => {
   const meta = await input({ message: 'Digite a meta:'})
 
   if(meta.length == 0) {
-    console.log('A meta não pode ser vazia.')
+    mensagem = 'A meta não pode ser vazia.';
     return //Se você quisesse manter a pessoa presa nessa etapa, bastava digitar "return ((await)) cadastrarMeta()" para chamar a função novamente até que o usuário digite uma meta não vazia.
   }
 
   metas.push(
     { value: meta, checked: false }
 )
+
+  mensagem = 'Meta cadastrada com sucesso!'
 }
 
 const listarMetas = async () => {
+  if(metas.length == 0) {
+    mensagem = 'Não existem metas listadas. Por favor, cadastre uma ou mais metas.'
+    return
+  }
+
   const respostas = await checkbox({
     message: 'Use as setas para mudar de meta, o espaço para marcar/desmarcar e o Enter para finalizar essa etapa.',
     choices: [...metas], // As reticências significa Spread (espalhar) e serve para jogar tudo de um array dentro de outro
@@ -34,7 +43,7 @@ const listarMetas = async () => {
   })
 
   if(respostas.length == 0) {
-    console.log('Nenhuma meta selecionada');
+    mensagem = 'Nenhuma meta selecionada';
     return
   }
 
@@ -48,7 +57,7 @@ const listarMetas = async () => {
   /* forEach é um método associado a um array que possibilita executar uma função ~para cada~ elemento do array.
    "resposta", nesse caso, é o primeiro elemento do array que será tratado pela função*/
 
-  console.log('Meta(s) marcadas como concluída(s)');
+  mensagem = 'Meta(s) marcada(s) como concluída(s)';
 }
 
 const metasRealizadas = async () => {
@@ -57,7 +66,7 @@ const metasRealizadas = async () => {
   })
 
   if(realizadas.length == 0) {
-    console.log('Não existem metas realizadas!')
+    mensagem = 'Não existem metas realizadas!';
     return
   }
 
@@ -73,7 +82,7 @@ const metasAbertas = async () => {
   })
 
   if(abertas.length == 0) {
-    console.log('Todas as metas foram concluídas!')
+    mensagem = 'Todas as metas foram concluídas!';
     return
   }
 
@@ -95,7 +104,7 @@ const removerMetas = async () => {
   })
 
   if(metasARemover.length == 0) {
-    console.log('Nenhuma meta a remover.');
+    mensagem = 'Nenhuma meta foi removida.';
     return
   }
 
@@ -105,12 +114,24 @@ const removerMetas = async () => {
     })
   })
 
-  console.log('Meta(s) removida(s) com sucesso!')
+  mensagem = 'Meta(s) removida(s) com sucesso!'
+}
+
+const mostrarMensagem = () => {
+  console.clear(); //Esse comando serve para limpar o console e deixar o programa mais limpo.
+
+  if(mensagem != '') {
+    console.log('');
+    console.log(mensagem);
+    console.log('');
+    mensagem = '';
+  }
 }
 
 const start = async () => { // O async é obrigatório por conta do await lá na linha 9
   
   while(true){
+    mostrarMensagem(); //Chamando essa função aqui, o programa limpa o console sempre que o menu é mostrado, logo, mantendo o console limpo sempre.
 
     // O await, por sua vez, é usado para informar ao programa que, para o while ser ativado, ele deve ~aguardar~ o usuário selecionar algo (Essa seleção do usuário é possível graças ao select que a gente importou com o inquirer)
     const opcao = await select({
@@ -147,8 +168,7 @@ const start = async () => { // O async é obrigatório por conta do await lá na
 
     switch (opcao) {
       case 'cadastrar':
-        await cadastrarMeta(); //Sempre que for chamar uma função assíncrona, é preciso colocar await na frente
-        console.log(metas);
+        await cadastrarMeta(); // Sempre que for chamar uma função assíncrona, é preciso colocar await na frente
         break;
       case 'listar':
         await listarMetas();
