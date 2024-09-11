@@ -1,15 +1,33 @@
-const { select, input, checkbox } = require('@inquirer/prompts') /* Essa sintaxe define que o programa irá importar o inquirer, ou seja, que o programa irá buscar dentro da pasta node_modules o @inquirer e dentro do @inquirer, a pasta prompts e de dentro dela ele vai extrair alguma coisa ("um código... uma função... que a gente vai usar daqui a pouco")*/ 
+const { select, input, checkbox } = require('@inquirer/prompts') /* Essa sintaxe define que o programa irá importar o inquirer, ou seja, que o programa irá buscar dentro da pasta node_modules o @inquirer e dentro do @inquirer, a pasta prompts e de dentro dela ele vai extrair alguma coisa ("um código... uma função... que a gente vai usar daqui a pouco")*/
+const fs = require('fs').promises
 
 /* Palavras do professor sobre o que essa sintaxe informa/significa: O "require('@inquirer/prompts')" vai me devolver um objeto, de dentro do objeto eu quero apenas o "select" e o "input". */
 
 let mensagem = 'Bem vindo(a) ao App de Metas';
 
-let meta = { // Defino como será a estrutura do objeto meta
+/* let meta = {
   value: 'Tomar 3L de água por dia',
   checked: false
+} 
+
+Antes, eu definia a estrutura de cada meta que estava aqui, entretanto, ao criar o arquivo JSON de dados (metas.json), eu deixo definida a estrutura lá no arquivo json.
+*/
+
+let metas // Crio o array de metas
+
+const carregarMetas = async () => {
+  try {
+    const dados = await fs.readFile('metas.json', 'utf-8');
+    metas = JSON.parse(dados);
+  }
+  catch(erro) {
+    metas = [];
+  }
 }
 
-let metas = [ meta ] // crio o array de metas
+const salvarMetas = async () => {
+  await fs.writeFile("metas.json", JSON.stringify(metas, null, 2));
+}
 
 const cadastrarMeta = async () => {
   const meta = await input({ message: 'Digite a meta:'})
@@ -61,6 +79,11 @@ const listarMetas = async () => {
 }
 
 const metasRealizadas = async () => {
+  if(metas.length == 0) {
+    mensagem = 'Não existem metas listadas. Por favor, cadastre uma ou mais metas.'
+    return
+  }
+
   const realizadas = metas.filter((meta) => {
     return meta.checked
   })
@@ -77,6 +100,11 @@ const metasRealizadas = async () => {
 }
 
 const metasAbertas = async () => {
+  if(metas.length == 0) {
+    mensagem = 'Não existem metas listadas. Por favor, cadastre uma ou mais metas.'
+    return
+  }
+
   const abertas = metas.filter((meta) => {
     return !meta.checked
   })
@@ -93,6 +121,11 @@ const metasAbertas = async () => {
 }
 
 const removerMetas = async () => {
+  if(metas.length == 0) {
+    mensagem = 'Não existem metas listadas. Por favor, cadastre uma ou mais metas.'
+    return
+  }
+
   const metasDesmarcadas = metas.map((meta) => {
     return { value: meta.value, checked: false }
   })
@@ -130,8 +163,11 @@ const mostrarMensagem = () => {
 
 const start = async () => { // O async é obrigatório por conta do await lá na linha 9
   
+  await carregarMetas();
+  
   while(true){
     mostrarMensagem(); //Chamando essa função aqui, o programa limpa o console sempre que o menu é mostrado, logo, mantendo o console limpo sempre.
+    await salvarMetas();
 
     // O await, por sua vez, é usado para informar ao programa que, para o while ser ativado, ele deve ~aguardar~ o usuário selecionar algo (Essa seleção do usuário é possível graças ao select que a gente importou com o inquirer)
     const opcao = await select({
